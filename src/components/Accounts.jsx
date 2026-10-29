@@ -66,6 +66,7 @@ async function getAccounts() {
 function Accounts() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
   const [accounts, setAccounts] = useState([])
   const [dialogAccount, setDialogAccount] = useState(undefined)
   const [dialogError, setDialogError] = useState('')
@@ -113,21 +114,19 @@ function Accounts() {
   }
 
   async function saveAccount(form) {
-    console.log("entourage")
-    console.log(form)
     const branchId = getSelectedBranch()
     if (branchId == null) {
       setDialogError('No branch is selected.')
-      return
+      return false
     }
 
     const isEditing = dialogAccount !== null
     if (isEditing && (dialogAccount?.id == null || dialogAccount.id === '')) {
       setDialogError('This account does not have an ID and cannot be updated.')
-      return
+      return false
     }
 
-    const endpoint = new URL('http://localhost:8080/Inventory/api/accounts')
+    const endpoint = new URL('http://localhost:8080/Inventory/api/accounts/saveData')
     endpoint.searchParams.set('X-Branch-Id', String(branchId))
     if (isEditing) {
       endpoint.searchParams.set('id', String(dialogAccount.id))
@@ -148,13 +147,16 @@ function Accounts() {
       })
       const refreshedAccounts = await getAccounts()
       setAccounts(refreshedAccounts)
-      setDialogAccount(undefined)
+      setSuccessMsg("GL Account updated successfully")
+      //setDialogAccount(undefined)
+      return true
     } catch (saveError) {
       setDialogError(
         saveError instanceof Error
           ? saveError.message
           : 'Unable to save the account.',
       )
+      return false
     } finally {
       setIsSaving(false)
     }
@@ -188,11 +190,13 @@ function Accounts() {
           account={dialogAccount}
           isSaving={isSaving}
           error={dialogError}
+          successMsg={successMsg}
           onClose={() => {
             setDialogAccount(undefined)
             setDialogError('')
           }}
           onSave={saveAccount}
+          onInputChange={() => successMsg ? setSuccessMsg(null) : ''}
         />
       )}
     </div>

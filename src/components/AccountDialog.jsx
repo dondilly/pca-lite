@@ -7,21 +7,26 @@ function getFormValue(value) {
   }
 
   if (typeof value === 'object') {
-    println `value: ${value}`
-    return Object(
-        value
-             
-    )
+    return String(value.id ?? '')
   }
 
   return ''
 }
 
-function AccountDialog({ account, isSaving, error, onClose, onSave }) {
+function AccountDialog({
+  account,
+  isSaving,
+  error,
+  successMsg,
+  onClose,
+  onSave,
+  onInputChange,
+}) {
   const [accountGroups, setAccountGroups] = useState([])
   const [isLoadingGroups, setIsLoadingGroups] = useState(true)
   const [groupError, setGroupError] = useState('')
   const [form, setForm] = useState({
+    id:account?.id ?? '',
     accDescription: account?.accDescription ?? '',
     accCode: getFormValue(account?.accCode),
     custCode: getFormValue(account?.accCode),
@@ -82,25 +87,46 @@ function AccountDialog({ account, isSaving, error, onClose, onSave }) {
   function updateField(event) {
     const { name, value } = event.target
     setForm((current) => ({ ...current, [name]: value }))
+    onInputChange?.()
   }
 
-  function handleSubmit(event) {
+  function clearForm() {
+    setForm((current) => ({
+      ...current,
+      accDescription: '',
+      accCode: '',
+      custCode: '',
+      grpCode: '',
+    }))
+    setGroupError('')
+    onInputChange?.()
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault()
 
-    // const selectedGroupId = Number(form.grpCode)
-    // if (!Number.isInteger(selectedGroupId) || !accountGroups.some(
-    //   (group) => Number(group.id) === selectedGroupId,
-    // )) {
-    //   setGroupError('Select a valid account group.')
-    //   return
-    // }
+    const selectedGroupId = Number(form.grpCode)
+    if (
+      !Number.isInteger(selectedGroupId) ||
+      !accountGroups.some((group) => Number(group.id) === selectedGroupId)
+    ) {
+      setGroupError('Select a valid account group.')
+      return
+    }
 
-    onSave({
-      accDescription: form.accDescription,
-      accCode: form.accCode,
-      custCode:form.accCode,
-      grpCode: form.grpCode
+    const saved = await onSave({
+      data: {
+          id: form.id,
+          accDescription: form.accDescription,
+          accCode: form.accCode,
+          custCode: form.accCode,
+          grpCodeId: selectedGroupId,
+          grpCode: String(selectedGroupId)
+      }
     })
+    if (saved) {
+      clearForm()
+    }
   }
 
   return (
@@ -134,6 +160,9 @@ function AccountDialog({ account, isSaving, error, onClose, onSave }) {
                 )}
                 {groupError && (
                   <div className="alert alert-danger" role="alert">{groupError}</div>
+                )}
+                {successMsg && (
+                  <div className="alert alert-success" role="alert">{successMsg}</div>
                 )}
                 <div className="row g-3">
                   <div className="col-12">
@@ -175,7 +204,7 @@ function AccountDialog({ account, isSaving, error, onClose, onSave }) {
                         return (
                           <option
                             key={group.id ?? index}
-                            value={String(group)}
+                            value={String(group.id)}
                           >
                             {group.accDescription
                               ? `${groupCode} - ${group.accDescription}`
@@ -200,6 +229,14 @@ function AccountDialog({ account, isSaving, error, onClose, onSave }) {
                 </div>
               </div>
               <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger me-auto"
+                  onClick={clearForm}
+                  disabled={isSaving}
+                >
+                  Clear form
+                </button>
                 <button
                   type="button"
                   className="btn btn-outline-secondary"
