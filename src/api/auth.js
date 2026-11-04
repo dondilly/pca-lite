@@ -1,8 +1,62 @@
-const LOGIN_ENDPOINT = 'http://localhost:8080/Inventory/api/login'
-const BRANCH_LOGIN_ENDPOINT =
-  'http://localhost:8080/Inventory/api/dashboard/loginToBranchApi'
+const BASE_URL= 'http://localhost:8080/Inventory/api'
+const LOGIN_ENDPOINT = `${BASE_URL}/login`
+const BRANCH_LOGIN_ENDPOINT =`${BASE_URL}/dashboard/loginToBranchApi`
 let token = ''
 let selectedBranchId = null
+
+export const api_cradle = {
+      getPackageUnits:`${BASE_URL}/general/quantityUnitAsJSON`,
+      getItemTypes:`${BASE_URL}/general/itemTypeAsJSON`,
+      
+      getItems:`${BASE_URL}/general/itemsAsJSON`,
+      getCustomers:`${BASE_URL}/general/customersAsJSON`,
+      getVendors:`${BASE_URL}/general/vendorsAsJSON`,
+      getAccountTypes:`${BASE_URL}/general/accountTypesAsJSON`,
+      getAccountGroups:`${BASE_URL}/general/accountGroupsAsJSON`,
+      getAccounts:`${BASE_URL}/general/AccountsAsJSON`,
+      getBranches:`${BASE_URL}/general/branchesAsJSON`,
+      getMainCategories:`${BASE_URL}/general/itemCategoriesAsJSON`,
+      getSubCategories:`${BASE_URL}/general/itemSubCategoriesAsJSON`,
+      postAccGroupUrl:`${BASE_URL}/accountGroups/saveData`,
+      postAccountsUrl:`${BASE_URL}/account/saveData`,
+      postItemsUrl:`${BASE_URL}/items/saveData`,
+      R2Storage:`${BASE_URL}/r2Storage/upload`,
+      postBranchesUrl:`${BASE_URL}/branches/saveData`,
+      postVendorsUrl:`${BASE_URL}/vendors/saveData`,    
+      postCustomersUrl:`${BASE_URL}/customers/saveData`
+
+}
+
+
+
+
+ 
+
+
+export async function getData(apiUrl) {
+  const branchId = getSelectedBranch()
+  if (branchId == null) {
+    throw new Error('No branch is selected.')
+  }
+
+  const endpoint = new URL(
+       apiUrl
+  )
+  endpoint.searchParams.set('X-Branch-Id', String(branchId))
+
+  const response = await getRestData(endpoint)
+  const data = Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+      ? response.data
+      : null
+
+  if (!data) {
+    throw new Error('The account response was not a list.')
+  }
+
+  return data
+}
 
 export function getSelectedBranch() {
   return selectedBranchId
@@ -94,14 +148,20 @@ export async function getRestData(endpoint, options = {}){
 export async function postRestData(endpoint, options = {}){
      
      console.log("End Point: " + endpoint)
+     const isFormData =
+       typeof FormData !== 'undefined' && options.body instanceof FormData
 
      const response = await fetch(endpoint, {
         method:  options.method ? options.method : 'POST',
         ...(options.body !== undefined
-          ? { body: JSON.stringify(options.body) }
+          ? {
+              body: isFormData
+                ? options.body
+                : JSON.stringify(options.body),
+            }
           : {}),
         headers: {
-          ...(options.body !== undefined
+          ...(options.body !== undefined && !isFormData
             ? { 'Content-Type': 'application/json' }
             : {}),
           Authorization: `Bearer ${token}`,

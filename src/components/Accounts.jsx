@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { postRestData, getSelectedBranch } from '../api/auth.js'
-import AccountDialog from './AccountDialog.jsx'
+import { postRestData, getRestData, getSelectedBranch } from '../api/auth.js'
+import AccountDialog from './dialogs/AccountDialog.jsx'
 import DataTable from './DataTable.jsx'
 
 const accountColumns = [
@@ -49,7 +49,7 @@ async function getAccounts() {
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
-  const response = await postRestData(endpoint)
+  const response = await getRestData(endpoint)
   const accounts = Array.isArray(response)
     ? response
     : Array.isArray(response?.data)
@@ -167,7 +167,15 @@ function Accounts() {
       <div className="mb-4">
         <h1 className="h3 mb-0">Accounts</h1>
       </div>
-      <div className="d-flex justify-content-end mb-3">
+      <div className="d-flex justify-content-between mb-3">
+        <button
+            type="button"
+            className="btn btn-primary"
+            onClick={getAccounts}
+          >
+            <i className="bi bi-view-list me-2" aria-hidden="true"  />
+            Preview
+        </button>
         <button type="button" className="btn btn-primary" onClick={openAddDialog}>
           <i className="bi bi-plus-lg me-2" aria-hidden="true" />
           Add Account
@@ -202,5 +210,6 @@ function Accounts() {
     </div>
   )
 }
+
 
 export default Accounts

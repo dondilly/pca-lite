@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getRestData, getSelectedBranch } from '../api/auth.js'
+import { getRestData, getSelectedBranch, postRestData } from '../api/auth.js'
 import DataTable from './DataTable.jsx'
+import SubaCategoryDialog from './dialogs/SubaCategoryDialog.jsx'
 
 const subCategoryColumns = [
   {
@@ -58,6 +59,10 @@ function SubCategories() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [subCategories, setSubCategories] = useState([])
+  const [dialogCategory, setDialogCategory] = useState(undefined)
+  const [dialogError, setDialogError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -90,13 +95,79 @@ function SubCategories() {
     }
   }, [])
 
+  function openAddDialog() {
+    setDialogError('')
+    setSuccessMsg('')
+    setDialogCategory(null)
+  }
+
+  function openEditDialog(category) {
+    setDialogError('')
+    setSuccessMsg('')
+    setDialogCategory(category)
+  }
+
+  async function saveSubCategory(form) {
+    const branchId = getSelectedBranch()
+    if (branchId == null) {
+      setDialogError('No branch is selected.')
+      return false
+    }
+
+    const isEditing = dialogCategory !== null
+    if (isEditing && (dialogCategory?.id == null || dialogCategory.id === '')) {
+      setDialogError('This subcategory does not have an ID and cannot be updated.')
+      return false
+    }
+
+    const endpoint = new URL(
+      'http://localhost:8080/Inventory/api/itemSubCategories/saveData',
+    )
+    endpoint.searchParams.set('X-Branch-Id', String(branchId))
+    if (isEditing) {
+      endpoint.searchParams.set('id', String(dialogCategory.id))
+    }
+
+    const payload = {
+      ...(isEditing ? dialogCategory : {}),
+      ...form,
+    }
+
+    setIsSaving(true)
+    setDialogError('')
+    try {
+      const result = await postRestData(endpoint, {
+        method: isEditing ? 'PUT' : 'POST',
+        body: payload,
+      })
+      if (result && !result.code) {
+        setDialogError(result.errs || result.msg || 'Unable to save the subcategory.')
+        return false
+      }
+
+      const refreshedCategories = await getSubCategories()
+      setSubCategories(refreshedCategories)
+      setSuccessMsg(result?.msg || 'Subcategory saved successfully.')
+      return true
+    } catch (saveError) {
+      setDialogError(
+        saveError instanceof Error
+          ? saveError.message
+          : 'Unable to save the subcategory.',
+      )
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="container-fluid p-4 p-lg-4">
       <div className="mb-4">
         <h1 className="h3 mb-0">Sub Category</h1>
       </div>
       <div className="d-flex justify-content-end mb-3">
-        <button type="button" className="btn btn-primary">
+        <button type="button" className="btn btn-primary" onClick={openAddDialog}>
           <i className="bi bi-plus-lg me-2" aria-hidden="true" />
           Add Subcategory
         </button>
@@ -110,7 +181,23 @@ function SubCategories() {
         emptyMessage="No subcategory data available."
         isLoading={isLoading}
         error={error}
+        onEdit={openEditDialog}
       />
+      {dialogCategory !== undefined && (
+        <SubaCategoryDialog
+          key={dialogCategory?.id ?? 'new-sub-category'}
+          category={dialogCategory}
+          isSaving={isSaving}
+          error={dialogError}
+          successMsg={successMsg}
+          onClose={() => {
+            setDialogCategory(undefined)
+            setDialogError('')
+          }}
+          onSave={saveSubCategory}
+          onInputChange={() => setSuccessMsg('')}
+        />
+      )}
     </div>
   )
 }

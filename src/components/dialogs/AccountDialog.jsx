@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getRestData, getSelectedBranch } from '../api/auth.js'
+import { getRestData, getSelectedBranch, api_cradle } from '../../api/auth.js'
 
 function getFormValue(value) {
   if (value == null || typeof value === 'string' || typeof value === 'number') {
@@ -44,7 +44,7 @@ function AccountDialog({
         }
 
         const endpoint = new URL(
-          'http://localhost:8080/Inventory/api/general/accountGroupsAsJSON',
+            api_cradle.getAccountGroups
         )
         endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
