@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 
 const primaryNavigation = [
   ['Dashboard', 'speedometer2', '/'],
@@ -21,6 +22,10 @@ const adminNavigation = [
 ]
 
 function SideMenu({ mobileSidebarOpen = false, onClose }) {
+  const location = useLocation()
+  const isOrdersActive = location.pathname.startsWith('/orders')
+  const [ordersExpanded, setOrdersExpanded] = useState(() => isOrdersActive)
+
   return (
     
     <aside
@@ -37,15 +42,63 @@ function SideMenu({ mobileSidebarOpen = false, onClose }) {
                     Workspace
                   </small>
                 )}
-                <NavLink
-                  to={path}
-                  end={path === '/'}
-                  className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
-                  onClick={onClose}
-                >
-                  <i className={`bi bi-${icon}`} aria-hidden="true" />
-                  <span>{label}</span>
-                </NavLink>
+                {label === 'Orders' ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`nav-link w-100 text-start${isOrdersActive ? ' active' : ''}`}
+                      data-bs-toggle="collapse"
+                      aria-expanded={ordersExpanded}
+                      aria-controls="orders-submenu"
+                      onClick={() => setOrdersExpanded((expanded) => !expanded)}
+                    >
+                      <i className={`bi bi-${icon}`} aria-hidden="true" />
+                      <span>{label}</span>
+                      <i className="bi bi-chevron-down ms-auto" aria-hidden="true" />
+                    </button>
+                    {ordersExpanded && (
+                      <ul className="nav nav-submenu" id="orders-submenu">
+                        <li className="nav-item">
+                          <NavLink
+                            to="/orders/add-sales"
+                            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                            onClick={onClose}
+                          >
+                            <span>Add Sales</span>
+                          </NavLink>
+                        </li>
+                        <li className="nav-item">
+                          <NavLink
+                            to="/orders/sales-list"
+                            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                            onClick={onClose}
+                          >
+                            <span>Sales List</span>
+                          </NavLink>
+                        </li>
+                        <li className="nav-item">
+                          <NavLink
+                            to="/orders/receipts"
+                            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                            onClick={onClose}
+                          >
+                            <span>Receipts</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <NavLink
+                    to={path}
+                    end={path === '/'}
+                    className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+                    onClick={onClose}
+                  >
+                    <i className={`bi bi-${icon}`} aria-hidden="true" />
+                    <span>{label}</span>
+                  </NavLink>
+                )}
               </li>
             ))}
             <li className="nav-item">

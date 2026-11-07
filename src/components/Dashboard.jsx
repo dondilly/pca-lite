@@ -14,6 +14,8 @@ import MainCategories from './MainCategories.jsx'
 import SubCategories from './SubCategories.jsx'
 import AccountGroup from './AccountGroup.jsx'
 import Accounts from './Accounts.jsx'
+import InvoiceList from './reports/InvoiceList.jsx'
+
 
 const stats = [
   { label: 'Total users', value: '12,426', change: '+12.5%', icon: 'people', positive: true },
@@ -385,6 +387,9 @@ function Dashboard() {
 
           </div>} />
           <Route path="/orders" element={<MenuPage title="Orders" />} />
+          <Route path="/orders/add-sales" element={<MenuPage title="Add Sales" />} />
+          <Route path="/orders/sales-list" element={<MenuPage title="Sales List" />} />
+          <Route path="/orders/receipts" element={<MenuPage title="Receipts" />} />
           <Route
             path="/items"
             element={<Items />}
@@ -398,7 +403,7 @@ function Dashboard() {
           <Route path="/sub-categories" element={<SubCategories />} />
           <Route path="/account-groups" element={<AccountGroup />} />
           <Route path="/accounts" element={<Accounts />} />
-          <Route path="/reports" element={<MenuPage title="Reports" />} />
+          <Route path="/reports" element={<InvoiceList />} />
           <Route path="/integrations" element={<MenuPage title="Integrations" />} />
           <Route path="/settings" element={<MenuPage title="Settings" />} />
           <Route path="/security" element={<MenuPage title="Security" />} />

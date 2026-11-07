@@ -26,7 +26,10 @@ export const api_cradle = {
       postCustomersUrl:`${BASE_URL}/customers/saveData`
 
 }
+export const api_reports = {
+      salesReport:`${BASE_URL}/report/filteredSales`
 
+}
 
 
 
