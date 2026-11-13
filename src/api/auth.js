@@ -20,6 +20,7 @@ export const api_cradle = {
       getMainCategories:`${BASE_URL}/general/itemCategoriesAsJSON`,
       getSubCategories:`${BASE_URL}/general/itemSubCategoriesAsJSON`,
       getStockReportEntityItems:`${BASE_URL}/report/getReportEntityItems`,
+      getPaymentMethods:`${BASE_URL}/general/paymentModesAsJSON`,
      
       postAccGroupUrl:`${BASE_URL}/accountGroups/saveData`,
       postAccountsUrl:`${BASE_URL}/account/saveData`,

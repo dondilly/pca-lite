@@ -33,7 +33,7 @@ function saveLocalRecords(key, records) {
 
 
 async function saveOnlineReceipt(url,receipt) {
-    console.log(receipt.createdAt)
+    console.log(receipt.lines)
     const rcpt ={
           data : {
               
@@ -275,6 +275,8 @@ function PosInvoicing() {
   const [error, setError] = useState('')
   const [packageError, setPackageError] = useState('')
   const [notice, setNotice] = useState('')
+  const [account,setAccount] = useState(null)
+  const [paymentMethods,setPaymentMethods] = useState([])
 
   useEffect(() => {
     let isMounted = true
@@ -297,6 +299,7 @@ function PosInvoicing() {
         if (branchId == null) {
           throw new Error('Select a branch before opening the POS.')
         }
+        getPaymentMethods()
         const endpoint = new URL(api_cradle.getItems)
         endpoint.searchParams.set('X-Branch-Id', String(branchId))
         const unitsEndpoint = new URL(api_cradle.getPackageUnits)
@@ -525,6 +528,18 @@ function PosInvoicing() {
     } catch {
       setError('Unable to save the sale package in browser storage.')
     }
+  }
+
+  async function getPaymentMethods(){
+    const branchId = getSelectedBranch()
+    if (branchId == null) {
+      setError('No branch is selected.')
+      return false
+    }
+    const endpoint = new URL(api_cradle.getPaymentMethods)
+    endpoint.searchParams.set('X-Branch-Id', String(branchId))
+    let result = await getRestData(endpoint)
+    if(result){setPaymentMethods(result)}
   }
 
 
@@ -998,10 +1013,21 @@ function PosInvoicing() {
                               : ''}
                           </small>
                         </div>
-                        <div className="btn-group btn-group-sm pos-no-print" role="group" aria-label={`${line.name} quantity`}>
-                          <button type="button" className="btn btn-outline-secondary" onClick={() => updateCartQuantity(getLineId(line), line.quantity - 1)} aria-label={`Decrease ${line.name}`}>−</button>
-                          <span className="btn btn-outline-secondary disabled">{line.quantity}</span>
-                          <button type="button" className="btn btn-outline-secondary" onClick={() => updateCartQuantity(getLineId(line), line.quantity + 1)} aria-label={`Increase ${line.name}`}>+</button>
+                        <div className="d-flex align-items-center gap-2 pos-no-print">
+                          <div className="btn-group btn-group-sm" role="group" aria-label={`${line.name} quantity`}>
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => updateCartQuantity(getLineId(line), line.quantity - 1)} aria-label={`Decrease ${line.name}`}>−</button>
+                            <span className="btn btn-outline-secondary disabled">{line.quantity}</span>
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => updateCartQuantity(getLineId(line), line.quantity + 1)} aria-label={`Increase ${line.name}`}>+</button>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => updateCartQuantity(getLineId(line), 0)}
+                            aria-label={`Remove ${line.name} from cart`}
+                            title="Remove line item"
+                          >
+                            <i className="bi bi-trash" aria-hidden="true" />
+                          </button>
                         </div>
                         <strong className="text-nowrap">{currency.format(line.unitPrice * line.quantity)}</strong>
                       </div>
@@ -1020,6 +1046,24 @@ function PosInvoicing() {
                     className="form-select mb-3"
                     value={paymentMethod}
                     onChange={(event) => setPaymentMethod(event.target.value)}
+                  >
+                   {paymentMethods.map((pm, index) => (
+                          <option
+                            key={pm.id ?? index}
+                            value={String(pm.paymentModesTag)}
+                          >
+                            {pm.paymentModesTag
+                              ? `${pm.paymentModesTag}`
+                              : `${pm.paymentModesTag}` }
+                          </option>
+                      ))}
+                  </select>
+                  <label htmlFor="pos-payment-method" className="form-label">Account</label>
+                  <select
+                    id="pos-payment-account"
+                    className="form-select mb-3"
+                    value={account}
+                    onChange={(event) => setAccount(event.target.value)}
                   >
                     <option>Cash</option>
                     <option>Card</option>
