@@ -46,7 +46,7 @@ async function saveOnlineReceipt(url,receipt) {
               receivedAmount: receipt.amountTendered,
               salesIncomeAcc: receipt.salesIncomeAcc ?? null,
               lineItems : receipt.lines,
-              accNo:'020101'
+              accNo:receipt.account ?? null
 
           }
 
@@ -277,6 +277,12 @@ function PosInvoicing() {
   const [notice, setNotice] = useState('')
   const [account,setAccount] = useState(null)
   const [paymentMethods,setPaymentMethods] = useState([])
+  const selectedPaymentMethod = paymentMethods.find(
+    (method) => String(method.paymentModesTag) === paymentMethod,
+  )
+  const paymentAccounts = Array.isArray(selectedPaymentMethod?.account)
+    ? selectedPaymentMethod.account
+    : []
 
   useEffect(() => {
     let isMounted = true
@@ -542,6 +548,11 @@ function PosInvoicing() {
     if(result){setPaymentMethods(result)}
   }
 
+  function handlePaymentMethodChange(event) {
+    setPaymentMethod(event.target.value)
+    setAccount('')
+  }
+
 
   async function persist(url,receipt){
     const branchId = getSelectedBranch()
@@ -648,11 +659,13 @@ function PosInvoicing() {
       lines: cart,
       subtotal,
       paymentMethod,
+      account:account,
       amountTendered: paymentMethod === 'Cash' ? tendered : subtotal,
       changeDue: paymentMethod === 'Cash' ? changeDue : 0,
       createdAt: new Date().toISOString(),
       returnedQuantities: {},
     }
+
     const nextReceipts = [receipt, ...receipts]
     try {
       persist(api_cradle.postPOSReceiptUrl,receipt)//persist to server
@@ -1045,7 +1058,7 @@ function PosInvoicing() {
                     id="pos-payment-method"
                     className="form-select mb-3"
                     value={paymentMethod}
-                    onChange={(event) => setPaymentMethod(event.target.value)}
+                    onChange={handlePaymentMethodChange}
                   >
                    {paymentMethods.map((pm, index) => (
                           <option
@@ -1058,16 +1071,31 @@ function PosInvoicing() {
                           </option>
                       ))}
                   </select>
-                  <label htmlFor="pos-payment-method" className="form-label">Account</label>
+                  <label htmlFor="pos-payment-account" className="form-label">Account</label>
                   <select
                     id="pos-payment-account"
                     className="form-select mb-3"
-                    value={account}
+                    value={account ?? ''}
                     onChange={(event) => setAccount(event.target.value)}
                   >
-                    <option>Cash</option>
-                    <option>Card</option>
-                    <option>Transfer</option>
+                    <option value="">Select an account</option>
+                    {paymentAccounts.map((paymentAccount, index) => {
+                      const accountValue =
+                        
+                        paymentAccount?.accNo ?? ''
+                        
+                      const accountLabel =
+                        paymentAccount?.accDescription && paymentAccount?.accNo
+                          ? `${paymentAccount.accNo} - ${paymentAccount.accDescription}`
+                          : paymentAccount?.accDescription ??
+                            paymentAccount?.accNo ??
+                            String(paymentAccount)
+                      return (
+                        <option key={accountValue ?? index} value={String(accountValue)}>
+                          {accountLabel}
+                        </option>
+                      )
+                    })}
                   </select>
                   {paymentMethod === 'Cash' && (
                     <>
