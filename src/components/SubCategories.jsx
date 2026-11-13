@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getRestData, getSelectedBranch, postRestData } from '../api/auth.js'
+import { getRestData, getSelectedBranch, postRestData,api_cradle,api_reports } from '../api/auth.js'
 import DataTable from './DataTable.jsx'
 import SubaCategoryDialog from './dialogs/SubaCategoryDialog.jsx'
 
@@ -37,7 +37,7 @@ async function getSubCategories() {
   }
 
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/itemSubCategories/getItemSubCategories',
+      api_cradle.getSubCategories
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
@@ -121,7 +121,7 @@ function SubCategories() {
     }
 
     const endpoint = new URL(
-      'http://localhost:8080/Inventory/api/itemSubCategories/saveData',
+      api_cradle.postItemSubCategoriesUrl
     )
     endpoint.searchParams.set('X-Branch-Id', String(branchId))
     if (isEditing) {

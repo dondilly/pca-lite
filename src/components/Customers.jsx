@@ -47,9 +47,7 @@ async function getCustomers() {
     throw new Error('No branch is selected.')
   }
 
-  const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/customers/getCustomers',
-  )
+  const endpoint = new URL(api_cradle.getCustomers)
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
   const response = await getRestData(endpoint)

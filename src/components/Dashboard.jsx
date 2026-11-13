@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import logo from '../metis/assets/images/logo.svg'
+
+
+
+import pcaliteLogo from '../assets/pca-logo.png'
 import avatar from '../metis/assets/images/avatar-placeholder.svg'
 import '@fontsource-variable/inter'
 import '../metis/styles/scss/main.scss'
 import '../App.css'
-import { getRestData, getSelectedBranch } from '../api/auth.js'
+import { getRestData, getSelectedBranch,api_cradle,api_reports } from '../api/auth.js'
 import { Route, Routes } from 'react-router-dom'
 import SideMenu from './SideMenu.jsx'
 import Items from './Items.jsx'
@@ -15,6 +19,8 @@ import SubCategories from './SubCategories.jsx'
 import AccountGroup from './AccountGroup.jsx'
 import Accounts from './Accounts.jsx'
 import InvoiceList from './reports/InvoiceList.jsx'
+import ReceiptList from './reports/ReceiptList.jsx'
+import PosInvoicing from './PosInvoicing.jsx'
 
 
 const stats = [
@@ -26,7 +32,7 @@ const stats = [
 
 async function fetchCustomersRankingBySales(branchId) {
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/dashboard/getCustomersRankingBySales',
+    api_reports.getCustomersRanking
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
@@ -48,7 +54,7 @@ async function fetchCustomersRankingBySales(branchId) {
 
 async function fetchItemsRankingBySales(branchId) {
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/dashboard/getProductRankingBySales',
+    api_reports.getItemsRanking,
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
@@ -152,8 +158,8 @@ function Dashboard() {
         <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
           <div className="container-fluid">
             <a className="navbar-brand d-flex align-items-center" href="#dashboard">
-              <img src={logo} alt="" height="32" className="d-inline-block align-text-top me-2" />
-              <span className="h4 mb-0 fw-bold text-primary-emphasis">Metis</span>
+              <img src={pcaliteLogo} alt="" height="32" className="d-inline-block align-text-top me-2" />
+              <span className="h4 mb-0 fw-bold text-primary-emphasis">PCA-lite</span>
             </a>
 
             <button
@@ -387,9 +393,9 @@ function Dashboard() {
 
           </div>} />
           <Route path="/orders" element={<MenuPage title="Orders" />} />
-          <Route path="/orders/add-sales" element={<MenuPage title="Add Sales" />} />
-          <Route path="/orders/sales-list" element={<MenuPage title="Sales List" />} />
-          <Route path="/orders/receipts" element={<MenuPage title="Receipts" />} />
+          <Route path="/orders/add-sales" element={<PosInvoicing />} />
+          <Route path="/orders/invoice-list" element={<InvoiceList title="Sales List" />} />
+          <Route path="/orders/receipt-list" element={<ReceiptList title="Receipts List" />} />
           <Route
             path="/items"
             element={<Items />}

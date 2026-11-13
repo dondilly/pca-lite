@@ -2,6 +2,7 @@ import { useCallback , useEffect, useState} from 'react'
 import { api_cradle, getRestData, getSelectedBranch, postRestData } from '../api/auth.js'
 import DataTable from './DataTable.jsx'
 import ItemDialog from './dialogs/ItemDialog.jsx'
+import InventoryStatus from './reports/InventoryStatus.jsx'
 
 const itemColumns = [
   {
@@ -43,13 +44,13 @@ const itemColumns = [
   {
     id: 'unitCost',
     name: 'Unit Cost',
-    selector: (item) => item.unitCost ?? '',
+    selector: (item) => item.costPrice?.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' }) ?? '',
     sortable: true,
   },
   {
     id: 'unitPrice',
     name: 'Unit Price',
-    selector: (item) => item.unitPrice ?? '',
+    selector: (item) => item.sellingPrice?.toLocaleString('en-NG', { style: 'currency', currency: 'NGN' }) ?? '',
     sortable: true,
   },
   {
@@ -67,6 +68,12 @@ const itemColumns = [
 
 ]
 
+const itemPageNavigation = [
+  { id: 'items', label: 'Items' },
+  { id: 'inventory-status', label: 'Inventory Status', component: InventoryStatus },
+  { id: 'reorder-list', label: 'Reorder List' },
+]
+
 
 
 
@@ -76,9 +83,7 @@ async function getItems() {
     throw new Error('No branch is selected.')
   }
 
-  const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/items/getItems',
-  )
+  const endpoint = new URL(api_cradle.getItems)
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
   const response = await getRestData(endpoint)
@@ -110,6 +115,7 @@ function Items() {
   const [dialogError, setDialogError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [activePage, setActivePage] = useState('items')
 
 
   const reloadItems = useCallback(async () => {
@@ -158,6 +164,12 @@ function Items() {
     setDialogError('')
     setSuccessMsg('')
     setDialogItem(item)
+  }
+
+  function deleteItem(itemId) {
+    // Implement the logic to delete the item with the given itemId
+    // You can use an API call to delete the item from the backend
+    // After successful deletion, you may want to reload the items list
   }
 
   async function saveItem({ data, imageFile }) {
@@ -303,9 +315,36 @@ function Items() {
     }
   }
 
+  const ActivePageComponent = itemPageNavigation.find(
+    ({ id }) => id === activePage,
+  )?.component
+
   return (
     <>
       <div className="container-fluid p-4 p-lg-4">
+        <nav className="nav border-bottom mb-4" aria-label="Inventory pages">
+          {itemPageNavigation.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={`btn btn-link rounded-0 text-decoration-none px-3 ${
+                activePage === id
+                  ? 'text-primary border-bottom border-primary border-2'
+                  : 'text-body'
+              }`}
+              aria-current={activePage === id ? 'page' : undefined}
+              onClick={() => {
+                setActivePage(id)
+                setDialogItem(undefined)
+                setDialogError('')
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+        {activePage === 'items' ? (
+          <>
         <div className="mb-4">
           <h1 className="h3 mb-0">Items</h1>
         </div>
@@ -326,8 +365,21 @@ function Items() {
           error={error}
           onEdit={openEditDialog}
         />
+          </>
+        ) : ActivePageComponent ? (
+          <ActivePageComponent />
+        ) : (
+          <section aria-labelledby={`${activePage}-title`}>
+            <h1 className="h3 mb-3" id={`${activePage}-title`}>
+              {itemPageNavigation.find(({ id }) => id === activePage)?.label}
+            </h1>
+            <p className="text-muted">
+              This view is not connected to inventory data yet.
+            </p>
+          </section>
+        )}
       </div>
-      {dialogItem !== undefined && (
+      {activePage === 'items' && dialogItem !== undefined && (
         <ItemDialog
           key={dialogItem?.id ?? 'new-item'}
           item={dialogItem}

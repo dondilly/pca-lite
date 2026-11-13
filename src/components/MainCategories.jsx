@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getRestData, getSelectedBranch, postRestData } from '../api/auth.js'
+import { getRestData, getSelectedBranch, postRestData, api_cradle } from '../api/auth.js'
 import DataTable from './DataTable.jsx'
 import MainCategoryDialog from './dialogs/MainCategoryDialog.jsx'
 
@@ -25,7 +25,7 @@ async function getMainCategories() {
   }
 
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/itemCategories/getItemCategories'
+       api_cradle.getMainCategories
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 

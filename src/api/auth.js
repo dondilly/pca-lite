@@ -1,3 +1,4 @@
+// const BASE_URL= 'https://pca.edge-b.scopefountain.com.ng/api'
 const BASE_URL= 'http://localhost:8080/Inventory/api'
 const LOGIN_ENDPOINT = `${BASE_URL}/login`
 const BRANCH_LOGIN_ENDPOINT =`${BASE_URL}/dashboard/loginToBranchApi`
@@ -7,6 +8,7 @@ let selectedBranchId = null
 export const api_cradle = {
       getPackageUnits:`${BASE_URL}/general/quantityUnitAsJSON`,
       getItemTypes:`${BASE_URL}/general/itemTypeAsJSON`,
+      getPackageDistribution: `${BASE_URL}/general/pkgDistributionAsJSON`,
       
       getItems:`${BASE_URL}/general/itemsAsJSON`,
       getCustomers:`${BASE_URL}/general/customersAsJSON`,
@@ -17,24 +19,55 @@ export const api_cradle = {
       getBranches:`${BASE_URL}/general/branchesAsJSON`,
       getMainCategories:`${BASE_URL}/general/itemCategoriesAsJSON`,
       getSubCategories:`${BASE_URL}/general/itemSubCategoriesAsJSON`,
+      getStockReportEntityItems:`${BASE_URL}/report/getReportEntityItems`,
+     
       postAccGroupUrl:`${BASE_URL}/accountGroups/saveData`,
       postAccountsUrl:`${BASE_URL}/account/saveData`,
       postItemsUrl:`${BASE_URL}/items/saveData`,
       R2Storage:`${BASE_URL}/r2Storage/upload`,
       postBranchesUrl:`${BASE_URL}/branches/saveData`,
       postVendorsUrl:`${BASE_URL}/vendors/saveData`,    
-      postCustomersUrl:`${BASE_URL}/customers/saveData`
+      postCustomersUrl:`${BASE_URL}/customers/saveData`,
+      postItemSubCategoriesUrl:`${BASE_URL}/itemSubCategories/saveData`,
+      postPOSReceiptUrl:`${BASE_URL}/salesMain/savePOS`
 
 }
 export const api_reports = {
-      salesReport:`${BASE_URL}/report/filteredSales`
+      salesReport:`${BASE_URL}/report/filteredSales`,
+      receiptReport: `${BASE_URL}/report/getBranchReceipts`,
+      inventoryStatusReport: `${BASE_URL}/report/getStockReportDetails`,
+      getCurrentBranchStockStatus:`${BASE_URL}/report/getCurrentBranchStockStatus`,
+      getCustomersRanking:`${BASE_URL}/dashboard/getCustomersRankingBySales`,
+      getItemsRanking:`${BASE_URL}/dashboard/getItemsRankingBySales`,
+}
 
+export const api_delete = {
+      deleteReceipt: `${BASE_URL}/receiptHistory/delete_lite`
 }
 
 
 
  
+export function formatDate(date) {
+  if (!date) {
+    return ''
+  }
 
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${day}-${month}-${year}`
+  const today = new Date();
+     
+}
+
+export function todatFormattedDate(dateString) {
+      const today = new Date();
+      const formattedDate = new Intl.DateTimeFormat('en-GB')
+     .format(today)
+     .replace(/\//g, '-');
+     return formattedDate
+}
 
 export async function getData(apiUrl) {
   const branchId = getSelectedBranch()

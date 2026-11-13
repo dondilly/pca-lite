@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getRestData, getSelectedBranch, postRestData } from '../api/auth.js'
+import { getRestData, getSelectedBranch, postRestData,api_cradle } from '../api/auth.js'
 import DataTable from './DataTable.jsx'
 import VendorDialog from './dialogs/VendorDialog.jsx'
 
@@ -43,7 +43,7 @@ async function getVendors() {
   }
 
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/vendors/getVendors',
+    api_cradle.getVendors
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
@@ -127,7 +127,7 @@ function Vendors() {
     }
 
     const endpoint = new URL(
-      'http://localhost:8080/Inventory/api/vendors/saveData',
+      api_cradle.postVendorsUrl,
     )
     endpoint.searchParams.set('X-Branch-Id', String(branchId))
     if (isEditing) {

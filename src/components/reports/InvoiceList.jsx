@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { api_reports, getRestData, getSelectedBranch } from '../../api/auth.js'
+import { api_reports, getRestData, getSelectedBranch, formatDate } from '../../api/auth.js'
 import DataTable from '../DataTable.jsx'
 
 const salesDataColumns = [
@@ -44,16 +44,7 @@ const salesDataColumns = [
   },
 ]
 
-function formatDate(date) {
-  if (!date) {
-    return ''
-  }
 
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${day}-${month}-${year}`
-}
 
 async function getSalesData(startDate = '', endDate = '') {
   const branchId = getSelectedBranch()

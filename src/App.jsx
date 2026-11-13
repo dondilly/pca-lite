@@ -11,7 +11,7 @@ function App() {
   const [delayEnded, setDelayEnded] = useState(false)
 
   return (
-    <main className="container py-5">
+    <main className="">
       {isLoggedIn ? (
         delayEnded ? (
           <Dashboard />

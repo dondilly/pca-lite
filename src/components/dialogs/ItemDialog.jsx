@@ -10,8 +10,8 @@ const emptyItem = {
   qtyUnit: '',
   category: '',
   sku: '',
-  unitCost: '',
-  unitPrice: '',
+  costPrice: '',
+  sellingPrice: '',
   imageStr: '',
   imageThumbnail: '',
 }
@@ -156,7 +156,7 @@ function ItemDialog({
          }
 
      }
-    for (const field of ['unitCost', 'unitPrice']) {
+    for (const field of ['costPrice', 'sellingPrice']) {
       if (itemData.data[field] !== '') {
         const numericValue = Number(itemData.data[field])
         if (!Number.isFinite(numericValue)) {
@@ -349,12 +349,12 @@ function ItemDialog({
                     <label htmlFor="item-unit-cost" className="form-label">Unit cost</label>
                     <input
                       id="item-unit-cost"
-                      name="unitCost"
+                      name="costPrice"
                       type="number"
                       min="0"
                       step="any"
                       className="form-control"
-                      value={form.unitCost}
+                      value={form.costPrice}
                       onChange={updateField}
                     />
                   </div>
@@ -362,12 +362,12 @@ function ItemDialog({
                     <label htmlFor="item-unit-price" className="form-label">Unit price</label>
                     <input
                       id="item-unit-price"
-                      name="unitPrice"
+                      name="sellingPrice"
                       type="number"
                       min="0"
                       step="any"
                       className="form-control"
-                      value={form.unitPrice}
+                      value={form.sellingPrice}
                       onChange={updateField}
                     />
                   </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { postRestData, getRestData, getSelectedBranch } from '../api/auth.js'
+import { postRestData, getRestData, getSelectedBranch, api_cradle } from '../api/auth.js'
 import AccountDialog from './dialogs/AccountDialog.jsx'
 import DataTable from './DataTable.jsx'
 
@@ -45,7 +45,7 @@ async function getAccounts() {
   }
 
   const endpoint = new URL(
-    'http://localhost:8080/Inventory/api/general/accountsAsJSON',
+    api_cradle.getAccounts
   )
   endpoint.searchParams.set('X-Branch-Id', String(branchId))
 
@@ -126,7 +126,7 @@ function Accounts() {
       return false
     }
 
-    const endpoint = new URL('http://localhost:8080/Inventory/api/accounts/saveData')
+    const endpoint = new URL(api_cradle.postAccountsUrl)
     endpoint.searchParams.set('X-Branch-Id', String(branchId))
     if (isEditing) {
       endpoint.searchParams.set('id', String(dialogAccount.id))
